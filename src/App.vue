@@ -7,7 +7,7 @@
               <div class="exitTodo">Выйти</div>
           </div>
           <div class="divMain">
-              <todo-list-colomn1 :arrTodo="arrTodo" :delTodo="delTodo" :addTodo="addTodo" :addTodoBut="addTodoBut" @useItem="useItem(index)" @deleteTodo="deleteTodo(index)" @addTodoItem="addTodoItem(this.addTitle)" @closeAddTodoBut="closeAddTodoBut" @show-addTodo="showAddTodo"/>
+              <todo-list-colomn1 :arrTodo="arrTodo" :delTodo="delTodo" :addTodo="addTodo" :addTodoBut="addTodoBut" :deleteTitle="deleteTitle" :changeTodoEl="changeTodoEl" @showChangeTodo="showChangeTodo" @selectColorTodo="selectColorTodo" @yesDeleteTodo="yesDeleteTodo" @noDeleteTodo="noDeleteTodo" @showDeleteWindow="showDeleteWindow" @useItem="useItem" @addTodoItem="addTodoItem" @closeAddTodoBut="closeAddTodoBut" @show-addTodo="showAddTodo"/>
               <div class="secondColon"></div>
               <todo-list-colomn3 :arrTodoChild="arrTodoChild" :delTodoChild="delTodoChild" :addTodoChild="addTodoChild" :addTodoChildBut="addTodoChildBut" :errDone="errDone" :errNoDone="errNoDone" @showAddTodoChild="showAddTodoChild" @closeAddTodoChild="closeAddTodoChild"/>
           </div>
@@ -47,6 +47,9 @@
           errDone: false,
           errNoDone: false,
           objectTodo: {},
+          deleteTitle: '',
+          deleteIndex: 0,
+          changeTodoEl: false,
       }
     },
     components: {
@@ -54,12 +57,11 @@
         TodoListColomn3,
     },
     methods: {
-        deleteTodo: function (index) {
-            if (index == this.arrTodo[this.arrTodo.length - 1]) {
-                this.arrTodo.pop();
-            } else if (index !== this.arrTodo[this.arrTodo.length - 1]) {
-                this.arrTodo.splice(index, 1);
-            }
+        showDeleteWindow: function (index) {
+            this.delTodo = true;
+            this.deleteTitle = this.arrTodo[index].title;
+            this.deleteIndex = index;
+
         },
         showAddTodo: function () {
             this.addTodo = true;
@@ -72,8 +74,12 @@
             this.objectTodo.color = 0;
             this.arrTodo.push(this.objectTodo);
             this.arrTodo = JSON.parse(JSON.stringify(this.arrTodo));
+            this.addTodo = false;
         },
         useItem: function (index) {
+            for(let i = 0; i <= this.arrTodo.length - 1; i++) {
+                this.arrTodo[i].color = 0;
+            }
             this.arrTodo[index].color = 1;
         },
         showAddTodoChild: function () {
@@ -81,6 +87,26 @@
         },
         closeAddTodoChild: function () {
             this.addTodoChild = false;
+        },
+        yesDeleteTodo: function () {
+            if (this.deleteIndex == this.arrTodo[this.arrTodo.length - 1]) {
+                this.arrTodo.pop();
+            } else if (this.deleteIndex !== this.arrTodo[this.arrTodo.length - 1]) {
+                this.arrTodo.splice(this.deleteIndex, 1);
+            }
+            this.delTodo = false;
+        },
+        noDeleteTodo: function () {
+            this.delTodo = false;
+        },
+        selectColorTodo: function (index) {
+            for(let i = 0; i <= this.arrTodo.length - 1; i++) {
+                this.arrTodo[i].color = 0;
+            }
+            this.arrTodo[index].color = 1;
+        },
+        showChangeTodo: function () {
+            this.changeTodoEl = true;
         }
     }
   }

@@ -1,22 +1,26 @@
 <template>
     <div class="firstColon">
         <div class="contSelect">
-            <select>
-                <option v-for="(item, index) in arrTodo" :key="index">{{ item.title }}</option>
+            <select @change="selectColorTodo(valueOption)" v-model="valueOption">
+                <option v-for="(item, index) in arrTodo" :value="index" :key="index">{{ item.title }}</option>
             </select>
         </div>
         <div class="listTodo">
-            <div v-for="(item, index) in arrTodo" class="exampleTodo" :key="index" @click="useItem(index)">
-                <div class="contTodo" :class="{exampleColorBlue: item.color == 1,boldBorder: item.color == 1, exampleColorGreen: item.color == 2}">{{ item.title }}</div>
-                <button class="change"><img src="../../public/change.png"></button>
-                <button @click="deleteTodo(index)" class="del"><img src="../../public/del.png"></button>
+            <div v-for="(item, index) in arrTodo" class="exampleTodo" :key="index">
+                <div class="contTodo" @click="useItem(index)" :class="{exampleColorBlue: item.color == 1,boldBorder: item.color == 1, exampleColorGreen: item.color == 2}">{{ item.title }}</div>
+                <button class="change" @click="showChangeTodo(index)"><img src="../../public/change.png"></button>
+                <button @click="showDeleteWindow(index)" class="del"><img src="../../public/del.png"></button>
+                <div class="changeTodo" v-if="changeTodoEl">
+                    <input type="text">
+                    <button class="change"><img src="../../public/change.png"></button>
+                </div>
             </div>
         </div>
         <div class="delTodo" v-if="delTodo">
-            <div class="delTodoText">Удалить список Сходить в Комп центр</div>
+            <div class="delTodoText">Удалить список {{ deleteTitle }}</div>
             <div class="delTodoButton">
-                <button class="delTodoNo">Нет</button>
-                <button class="delTodoYes">Да</button>
+                <button @click="noDeleteTodo" class="delTodoNo">Нет</button>
+                <button @click="yesDeleteTodo" class="delTodoYes">Да</button>
             </div>
         </div>
         <div class="addTodo" v-if="addTodo">
@@ -36,15 +40,16 @@
 
 <script>
     export default {
-        props: ['arrTodo', 'delTodo', 'addTodo', 'addTodoBut'],
+        props: ['arrTodo', 'delTodo', 'addTodo', 'addTodoBut', 'deleteTitle', 'changeTodoEl'],
         data() {
             return {
                 addTitle: '',
+                valueOption: 0,
             }
         },
         methods: {
-            deleteTodo: function (index) {
-                this.$emit('deleteTodo', index);
+            showDeleteWindow: function (index) {
+                this.$emit('showDeleteWindow', index);
             },
             showAddTodo: function () {
                 this.$emit('show-addTodo');
@@ -55,9 +60,22 @@
             addTodoItem: function () {
                 this.$emit('addTodoItem', this.addTitle);
             },
-            useItem: function () {
-                this.$emit('useItem');
+            useItem: function (index) {
+                this.$emit('useItem', index);
+            },
+            yesDeleteTodo: function () {
+                this.$emit('yesDeleteTodo');
+            },
+            noDeleteTodo: function () {
+                this.$emit('noDeleteTodo');
+            },
+            selectColorTodo: function (valueOption) {
+                this.$emit('selectColorTodo', valueOption);
+            },
+            showChangeTodo: function (index) {
+                this.$emit('showChangeTodo', index);
             }
+
         },
     }
 </script>
@@ -85,6 +103,7 @@
     }
     .exampleTodo {
         display: flex;
+        flex-wrap: wrap;
         margin-bottom: 10px;
     }
     .contTodo {
@@ -199,6 +218,7 @@
         height: 25px;
         border-radius: 15px;
         margin-left: 20px;
+        outline: none;
     }
     .delTodoNo {
         background-color: red;
@@ -207,6 +227,7 @@
         width: 50px;
         height: 25px;
         border-radius: 15px;
+        outline: none;
     }
     .exampleColorBlue {
         background-color: cornflowerblue;
@@ -216,5 +237,8 @@
     }
     .boldBorder {
         border: 2px solid #333333;
+    }
+    .changeTodo {
+        display: flex;
     }
 </style>
