@@ -1,36 +1,52 @@
 <template>
     <div class="thirdColon">
         <div class="nameTodo">TEST NAME TODO</div>
-        <div class="childTodo">
-            <input type="checkbox">
+        <div v-for="(item,index) in arrTodo[this.useItemIndex].arrTodoChild" class="childTodo" :key="index">
+            <check-box-done :index="index" :arrTodo="arrTodo" :useItemIndex="useItemIndex" :indexChildDone="indexChildDone" @checkDone="checkDone"/>
             <div class="childName">
-                <div class="dotName"></div>
-                CHILD TODO
+                <div v-if="item.dot == 1" class="dotName"></div>
+                {{ item.title }}
             </div>
-            <button class="changeChild"><img src="../../public/change.png"></button>
-            <button class="delChild"><img src="../../public/del.png"></button>
+            <button @click="showChangeChild(index)" class="changeChild"><img src="../../public/change.png"></button>
+            <button @click="showDelTodoChild(index)" class="delChild"><img src="../../public/del.png"></button>
         </div>
         <div v-if="delTodoChild" class="delTodoChild">
-            <div class="delTodoText">Удалить список Сходить в Комп центр</div>
-            <div class="delTodoButtonChild">
-                <button class="delTodoNoChild">Нет</button>
-                <button class="delTodoYesChild">Да</button>
+            <div class="delTodoChildCont">
+                <div class="delTodoText">Удалить дело {{ deleteTitleChild }}</div>
+                <div class="delTodoButtonChild">
+                    <button @click="closeDelTodoChild" class="delTodoNoChild">Нет</button>
+                    <button @click="yesDelTodoChild" class="delTodoYesChild">Да</button>
+                </div>
+            </div>
+        </div>
+        <div class="changeTodoChild" v-if="changeTodoElChild">
+            <div class="changeTodoElContChild">
+                <div class="changeTodoLogoChild">
+                    <div>Введите другое название списка</div>
+                    <button @click="closeChangeChild" class="delAddTodo"><img src="../../public/del.png"></button>
+                </div>
+                <div class="changeTodoInputChild">
+                    <input v-model="changeTitleChild" type="text">
+                    <button @click="changeTodoElemChild" class="change"><img src="../../public/change.png"></button>
+                </div>
             </div>
         </div>
         <div v-if="addTodoChild" class="addTodoChild">
-            <div class="addTodoChild1">
-                <div class="addNameChild">Добавить дело</div>
-                <button @click="closeAddTodoChild" class="delAddTodoChild"><img src="../../public/del.png"></button>
+            <div class="addTodoChildCont">
+                <div class="addTodoChild1">
+                    <div class="addNameChild">Добавить дело</div>
+                    <button @click="closeAddTodoChild" class="delAddTodoChild"><img src="../../public/del.png"></button>
+                </div>
+                <div class="addTodoChild2">
+                    <div>Название</div>
+                    <input v-model="addTitleChild" type="text">
+                </div>
+                <div class="preorityChild">
+                    Срочно
+                    <input v-model="checkboxEnable" type="checkbox">
+                </div>
+                <button @click="addTodoItemChild" class="addButtonChild">Добавить</button>
             </div>
-            <div class="addTodoChild2">
-                <div>Название</div>
-                <input type="text">
-            </div>
-            <div class="preorityChild">
-                Срочно
-                <input type="checkbox">
-            </div>
-            <button class="addButtonChild">Добавить</button>
         </div>
         <div class="childButAndDiv">
             <button @click="showAddTodoChild" v-if="addTodoChildBut" class="butAddTodoChild"><img src="../../public/add.png"></button>
@@ -43,16 +59,56 @@
 </template>
 
 <script>
+    import CheckBoxDone from './CheckBoxDone.vue'
     export default {
         name: "TodoListColomn3",
-        props: ['arrTodoChild', 'delTodoChild', 'addTodoChild', 'addTodoChildBut', 'errDone', 'errNoDone'],
+        props: ['arrTodo', 'delTodoChild', 'addTodoChild', 'addTodoChildBut', 'errDone', 'errNoDone', 'useItemIndex', 'deleteTitleChild', 'changeTodoElChild'],
+        data() {
+            return {
+                addTitleChild: '',
+                checkboxEnable: false,
+                changeTitleChild: '',
+                arrCheckDone: [],
+                checkDoneInput: '',
+                indexChildDone: 0,
+            }
+        },
+        components: {
+            CheckBoxDone,
+        },
         methods: {
             showAddTodoChild: function () {
                 this.$emit('showAddTodoChild');
             },
             closeAddTodoChild: function () {
                 this.$emit('closeAddTodoChild');
-            }
+            },
+            closeDelTodoChild: function () {
+                this.$emit('closeDelTodoChild');
+            },
+            showDelTodoChild: function (index) {
+                this.$emit('showDelTodoChild', index);
+            },
+            yesDelTodoChild: function () {
+                this.$emit('yesDelTodoChild');
+            },
+            addTodoItemChild: function () {
+                this.$emit('addTodoItemChild', this.addTitleChild, this.checkboxEnable);
+                this.addTitleChild = '';
+            },
+            showChangeChild: function (index) {
+                this.$emit('showChangeChild', index);
+            },
+            closeChangeChild: function () {
+                this.$emit('closeChangeChild');
+            },
+            changeTodoElemChild: function () {
+                this.$emit('changeTodoElemChild', this.changeTitleChild);
+                this.changeTitleChild = '';
+            },
+            checkDone: function (index) {
+                this.$emit('checkDone', index);
+            },
         },
     }
 </script>
@@ -111,10 +167,21 @@
     .addTodoChild {
         display: flex;
         justify-content: center;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: rgba(0,0,0,0.8);
+    }
+    .addTodoChildCont {
+        display: flex;
+        justify-content: center;
         flex-direction: column;
         align-items: center;
         width: 400px;
-        height: 145px;
+        height: 165px;
+        background-color: white;
         margin-top: 120px;
         margin-left: 20px;
         border: 1px solid #333333;
@@ -203,10 +270,21 @@
     .delTodoChild {
         display: flex;
         justify-content: center;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: rgba(0,0,0,0.8);
+     }
+    .delTodoChildCont {
+        display: flex;
+        justify-content: center;
         flex-direction: column;
         align-items: center;
         height: 100px;
         width: 350px;
+        background-color: white;
         margin-top: 50px;
         margin-left: 20px;
         border: 1px solid #333333;
@@ -223,6 +301,7 @@
         height: 25px;
         border-radius: 15px;
         margin-left: 20px;
+        outline: none;
     }
     .delTodoNoChild {
         background-color: red;
@@ -231,8 +310,10 @@
         width: 50px;
         height: 25px;
         border-radius: 15px;
+        outline: none;
     }
     .dotName {
+        display: block;
         background-color: red;
         width: 10px;
         height: 10px;
@@ -245,5 +326,58 @@
     }
     .preorityChild input {
         margin-left: 20px;
+    }
+    .changeTodoChild {
+        display: flex;
+        justify-content: center;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: rgba(0,0,0,0.8);
+    }
+    .changeTodoElContChild{
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        background-color: white;
+        width: 400px;
+        height: 110px;
+        margin-top: 50px;
+        border: 1px solid #333333;
+        border-radius: 25px;
+    }
+    .changeTodoLogoChild {
+        display: flex;
+        margin-bottom: 10px;
+    }
+    .changeTodoLogoChild div {
+        margin: 0px 60px 0 70px;
+    }
+    .changeTodoInputChild {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .change {
+        background-color: white;
+        border: none;
+        box-shadow: 1px 2px 0 #333333;
+        border-radius: 50%;
+        margin-left: 10px;
+        outline: none;
+    }
+    .change img {
+        width: 25px;
+    }
+    .delAddTodo img {
+        width: 20px;
+    }
+    .delAddTodo {
+        border: none;
+        background-color: white;
+        outline: none;
     }
 </style>

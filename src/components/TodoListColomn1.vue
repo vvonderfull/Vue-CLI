@@ -10,29 +10,41 @@
                 <div class="contTodo" @click="useItem(index)" :class="{exampleColorBlue: item.color == 1,boldBorder: item.color == 1, exampleColorGreen: item.color == 2}">{{ item.title }}</div>
                 <button class="change" @click="showChangeTodo(index)"><img src="../../public/change.png"></button>
                 <button @click="showDeleteWindow(index)" class="del"><img src="../../public/del.png"></button>
-                <div class="changeTodo" v-if="changeTodoEl">
-                    <input type="text">
-                    <button class="change"><img src="../../public/change.png"></button>
-                </div>
             </div>
         </div>
         <div class="delTodo" v-if="delTodo">
-            <div class="delTodoText">Удалить список {{ deleteTitle }}</div>
-            <div class="delTodoButton">
-                <button @click="noDeleteTodo" class="delTodoNo">Нет</button>
-                <button @click="yesDeleteTodo" class="delTodoYes">Да</button>
+            <div class="delTodoCont">
+                <div class="delTodoText">Удалить список {{ deleteTitle }}</div>
+                <div class="delTodoButton">
+                    <button @click="noDeleteTodo" class="delTodoNo">Нет</button>
+                    <button @click="yesDeleteTodo" class="delTodoYes">Да</button>
+                </div>
+            </div>
+        </div>
+        <div class="changeTodo" v-if="changeTodoEl">
+            <div class="changeTodoElCont">
+                <div class="changeTodoLogo">
+                    <div>Введите другое название списка</div>
+                    <button @click="delChangeTodo" class="delAddTodo"><img src="../../public/del.png"></button>
+                </div>
+                <div class="changeTodoInput">
+                    <input v-model="changeTitle" type="text">
+                    <button @click="changeTodoElem" class="change"><img src="../../public/change.png"></button>
+                </div>
             </div>
         </div>
         <div class="addTodo" v-if="addTodo">
-            <div class="addTodo1">
-                <div class="addName">Добавить список дел</div>
-                <button @click="closeAddTodoBut" class="delAddTodo"><img src="../../public/del.png"></button>
+            <div class="addTodoCont">
+                <div class="addTodo1">
+                    <div class="addName">Добавить список дел</div>
+                    <button @click="closeAddTodoBut" class="delAddTodo"><img src="../../public/del.png"></button>
+                </div>
+                <div class="addTodo2">
+                    <div>Название</div>
+                    <input v-model="addTitle" type="text">
+                </div>
+                <button @click="addTodoItem" class="addButton">Добавить</button>
             </div>
-            <div class="addTodo2">
-                <div>Название</div>
-                <input v-model="addTitle" type="text">
-            </div>
-            <button @click="addTodoItem" class="addButton">Добавить</button>
         </div>
         <button @click="showAddTodo" class="butAddTodo" v-if="addTodoBut"><img src="../../public/add.png"></button>
     </div>
@@ -45,6 +57,7 @@
             return {
                 addTitle: '',
                 valueOption: 0,
+                changeTitle: '',
             }
         },
         methods: {
@@ -59,6 +72,7 @@
             },
             addTodoItem: function () {
                 this.$emit('addTodoItem', this.addTitle);
+                this.addTitle = '';
             },
             useItem: function (index) {
                 this.$emit('useItem', index);
@@ -74,6 +88,13 @@
             },
             showChangeTodo: function (index) {
                 this.$emit('showChangeTodo', index);
+            },
+            delChangeTodo: function () {
+                this.$emit('delChangeTodo');
+            },
+            changeTodoElem: function () {
+                this.$emit('changeTodoElem', this.changeTitle);
+                this.changeTitle = '';
             }
 
         },
@@ -139,9 +160,21 @@
     .addTodo {
         display: flex;
         justify-content: center;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: rgba(0,0,0,0.8);
+    }
+    .addTodoCont {
+        display: flex;
+        justify-content: center;
         flex-direction: column;
         align-items: center;
+        width: 400px;
         height: 130px;
+        background-color: white;
         margin-top: 75px;
         border: 1px solid #333333;
         border-radius: 25px;
@@ -165,7 +198,7 @@
         outline: none;
     }
     .addName {
-        margin: 0 25px 0 60px;
+        margin: 0 80px 0 100px;
         font-size: 18px;
     }
     .addButton {
@@ -200,8 +233,21 @@
     .delTodo {
         display: flex;
         justify-content: center;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: rgba(0,0,0,0.8);
+
+    }
+    .delTodoCont {
+        display: flex;
+        justify-content: center;
         flex-direction: column;
         align-items: center;
+        background-color: white;
+        width: 400px;
         height: 100px;
         margin-top: 50px;
         border: 1px solid #333333;
@@ -229,6 +275,40 @@
         border-radius: 15px;
         outline: none;
     }
+    .changeTodo {
+        display: flex;
+        justify-content: center;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: rgba(0,0,0,0.8);
+    }
+    .changeTodoElCont{
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        background-color: white;
+        width: 400px;
+        height: 110px;
+        margin-top: 50px;
+        border: 1px solid #333333;
+        border-radius: 25px;
+    }
+    .changeTodoLogo {
+        display: flex;
+        margin-bottom: 10px;
+    }
+    .changeTodoLogo div {
+        margin: 0px 60px 0 70px;
+    }
+    .changeTodoInput {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
     .exampleColorBlue {
         background-color: cornflowerblue;
     }
@@ -237,8 +317,5 @@
     }
     .boldBorder {
         border: 2px solid #333333;
-    }
-    .changeTodo {
-        display: flex;
     }
 </style>
