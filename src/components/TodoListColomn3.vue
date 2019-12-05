@@ -1,8 +1,10 @@
 <template>
     <div class="thirdColon">
         <div class="nameTodo">TEST NAME TODO</div>
-        <div v-for="(item,index) in arrTodo[this.useItemIndex].arrTodoChild" class="childTodo" :key="index">
-            <check-box-done :index="index" :arrTodo="arrTodo" :useItemIndex="useItemIndex" :indexChildDone="indexChildDone" @checkDone="checkDone"/>
+        <div v-for="(item,index) in todoList" class="childTodo" :key="index">
+            <div @click="checkDone(index)" class="checkBox">
+                <img v-if="item.done === 1" src="../../public/done.png">
+            </div>
             <div class="childName">
                 <div v-if="item.dot == 1" class="dotName"></div>
                 {{ item.title }}
@@ -49,34 +51,32 @@
             </div>
         </div>
         <div class="childButAndDiv">
-            <button @click="showAddTodoChild" v-if="addTodoChildBut" class="butAddTodoChild"><img src="../../public/add.png"></button>
-            <div class="errorsTodoChild">
-                <div v-if="errDone" class="error1"><img src="../../public/done.png">Успешно добавлено</div>
-                <div v-if="errNoDone" class="error2"><img src="../../public/del.png">Невозможно добавить</div>
-            </div>
+            <button @click="showAddTodoChild" v-if="addTodoChildBut" class="butAddTodoChild"><img
+                    src="../../public/add.png"></button>
         </div>
     </div>
 </template>
 
 <script>
-    import CheckBoxDone from './CheckBoxDone.vue'
     export default {
         name: "TodoListColomn3",
         props: ['arrTodo', 'delTodoChild', 'addTodoChild', 'addTodoChildBut', 'errDone', 'errNoDone', 'useItemIndex', 'deleteTitleChild', 'changeTodoElChild'],
         data() {
             return {
+                todoList: '',
                 addTitleChild: '',
                 checkboxEnable: false,
                 changeTitleChild: '',
-                arrCheckDone: [],
-                checkDoneInput: '',
-                indexChildDone: 0,
             }
         },
-        components: {
-            CheckBoxDone,
-        },
         methods: {
+            setDone(index) {
+                if (this.arrTodo[this.useItemIndex].arrTodoChild[index].done === 0) {
+                    this.arrTodo[this.useItemIndex].arrTodoChild[index].done = 1
+                } else {
+                    this.arrTodo[this.useItemIndex].arrTodoChild[index].done = 0
+                }
+            },
             showAddTodoChild: function () {
                 this.$emit('showAddTodoChild');
             },
@@ -93,8 +93,20 @@
                 this.$emit('yesDelTodoChild');
             },
             addTodoItemChild: function () {
-                this.$emit('addTodoItemChild', this.addTitleChild, this.checkboxEnable);
-                this.addTitleChild = '';
+                /*eslint-env jquery*/
+                if (!this.addTitleChild) {
+                    this.$toastr.error('Название не может быть пустым!', 'Ошибка!', {
+                        closeButton: true,
+                        timeOut: 3000,
+                    });
+                } else {
+                    this.$emit('addTodoItemChild', this.addTitleChild, this.checkboxEnable);
+                    this.$toastr.success('Успешно добавлена подзадача: ' + this.addTitleChild, 'Успешно добавлено!', {
+                        closeButton: true,
+                        timeOut: 3000,
+                    });
+                    this.addTitleChild = '';
+                }
             },
             showChangeChild: function (index) {
                 this.$emit('showChangeChild', index);
@@ -110,6 +122,22 @@
                 this.$emit('checkDone', index);
             },
         },
+        async mounted() {
+            await this.$store.dispatch('fetchTodo')
+            console.log(this.$store.state.todo.todo);
+            this.todoList = this.$store.state.todo.todo
+        },
+        computed: {
+            formatList () {
+                const TodoList = {}
+                for (let i in this.t) {
+                    if (i !== 'title' && i !== 'color') {
+                        TodoList[i] = this.t[i]
+                    }
+                }
+                return TodoList
+            }
+        },
     }
 </script>
 
@@ -119,20 +147,24 @@
         flex-direction: column;
         width: 490px;
     }
+
     .nameTodo {
         text-align: center;
         margin-top: 10px;
     }
+
     .childTodo {
         display: flex;
         justify-content: space-around;
         align-items: center;
         margin-top: 10px;
     }
+
     .childTodo input {
         width: 20px;
         height: 20px;
     }
+
     .changeChild {
         background-color: white;
         border: none;
@@ -141,9 +173,11 @@
         margin-left: 10px;
         outline: none;
     }
+
     .changeChild img {
         width: 25px;
     }
+
     .delChild {
         background-color: white;
         border: none;
@@ -152,9 +186,11 @@
         margin-left: 10px;
         outline: none;
     }
+
     .delChild img {
         width: 25px;
     }
+
     .childName {
         display: flex;
         justify-content: center;
@@ -164,6 +200,7 @@
         border: 1px solid #333333;
         padding-right: 50px;
     }
+
     .addTodoChild {
         display: flex;
         justify-content: center;
@@ -172,8 +209,9 @@
         right: 0;
         bottom: 0;
         left: 0;
-        background: rgba(0,0,0,0.8);
+        background: rgba(0, 0, 0, 0.8);
     }
+
     .addTodoChildCont {
         display: flex;
         justify-content: center;
@@ -187,28 +225,34 @@
         border: 1px solid #333333;
         border-radius: 25px;
     }
+
     .addTodoChild1 {
         display: flex;
         justify-content: space-between;
         align-items: center;
     }
+
     .addTodoChild2 {
         display: flex;
         justify-content: center;
         margin-top: 10px;
     }
+
     .delAddTodoChild img {
         width: 20px;
     }
+
     .delAddTodoChild {
         border: none;
         background-color: white;
         outline: none;
     }
+
     .addNameChild {
         margin: 0 105px 0 130px;
         font-size: 18px;
     }
+
     .addButtonChild {
         width: 100px;
         height: 30px;
@@ -219,13 +263,16 @@
         margin-top: 20px;
         outline: none;
     }
+
     .addTodoChild2 input {
         margin: 0 70px 0 10px;
         outline: none;
     }
+
     .butAddTodoChild img {
         width: 50px;
     }
+
     .butAddTodoChild {
         display: flex;
         justify-content: center;
@@ -239,34 +286,12 @@
         box-shadow: 1px 2px 0 #333333;
         outline: none;
     }
+
     .childButAndDiv {
         display: flex;
         align-items: center;
     }
-    .error1 {
-        display: flex;
-        align-items: center;
-        margin-left: 20px;
-        width: 330px;
-        height: 50px;
-        border: 1px solid #333333;
-        border-radius: 25px;
-    }
-    .error1 img {
-        margin: 0 10px 0 10px;
-    }
-    .error2 {
-        display: flex;
-        align-items: center;
-        margin-left: 20px;
-        width: 330px;
-        height: 50px;
-        border: 1px solid #333333;
-        border-radius: 25px;
-    }
-    .error2 img {
-        margin: 0 10px 0 10px;
-    }
+
     .delTodoChild {
         display: flex;
         justify-content: center;
@@ -275,8 +300,9 @@
         right: 0;
         bottom: 0;
         left: 0;
-        background: rgba(0,0,0,0.8);
-     }
+        background: rgba(0, 0, 0, 0.8);
+    }
+
     .delTodoChildCont {
         display: flex;
         justify-content: center;
@@ -290,9 +316,11 @@
         border: 1px solid #333333;
         border-radius: 25px;
     }
+
     .delTodoButtonChild {
         margin-top: 15px;
     }
+
     .delTodoYesChild {
         background-color: green;
         color: white;
@@ -303,6 +331,7 @@
         margin-left: 20px;
         outline: none;
     }
+
     .delTodoNoChild {
         background-color: red;
         color: white;
@@ -312,6 +341,7 @@
         border-radius: 15px;
         outline: none;
     }
+
     .dotName {
         display: block;
         background-color: red;
@@ -320,13 +350,16 @@
         border-radius: 50px;
         margin-right: 50px;
     }
+
     .preorityChild {
         display: flex;
         margin: 10px 210px 0 0;
     }
+
     .preorityChild input {
         margin-left: 20px;
     }
+
     .changeTodoChild {
         display: flex;
         justify-content: center;
@@ -335,9 +368,10 @@
         right: 0;
         bottom: 0;
         left: 0;
-        background: rgba(0,0,0,0.8);
+        background: rgba(0, 0, 0, 0.8);
     }
-    .changeTodoElContChild{
+
+    .changeTodoElContChild {
         display: flex;
         justify-content: center;
         flex-direction: column;
@@ -349,18 +383,22 @@
         border: 1px solid #333333;
         border-radius: 25px;
     }
+
     .changeTodoLogoChild {
         display: flex;
         margin-bottom: 10px;
     }
+
     .changeTodoLogoChild div {
         margin: 0px 60px 0 70px;
     }
+
     .changeTodoInputChild {
         display: flex;
         justify-content: center;
         align-items: center;
     }
+
     .change {
         background-color: white;
         border: none;
@@ -369,15 +407,29 @@
         margin-left: 10px;
         outline: none;
     }
+
     .change img {
         width: 25px;
     }
+
     .delAddTodo img {
         width: 20px;
     }
+
     .delAddTodo {
         border: none;
         background-color: white;
         outline: none;
+    }
+
+    .checkBox {
+        border: 1px solid #333333;
+        width: 20px;
+        height: 20px;
+        margin: 0 5px 0 5px;
+    }
+
+    .checkBox img {
+        width: 20px;
     }
 </style>

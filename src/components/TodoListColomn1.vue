@@ -6,7 +6,7 @@
             </select>
         </div>
         <div class="listTodo">
-            <div v-for="(item, index) in arrTodo" class="exampleTodo" :key="index">
+            <div v-for="(item, index) in todo" class="exampleTodo" :key="index">
                 <div class="contTodo" @click="useItem(index)" :class="{exampleColorBlue: item.color == 1,boldBorder: item.color == 1, exampleColorGreen: item.color == 2}">{{ item.title }}</div>
                 <button class="change" @click="showChangeTodo(index)"><img src="../../public/change.png"></button>
                 <button @click="showDeleteWindow(index)" class="del"><img src="../../public/del.png"></button>
@@ -55,6 +55,7 @@
         props: ['arrTodo', 'delTodo', 'addTodo', 'addTodoBut', 'deleteTitle', 'changeTodoEl'],
         data() {
             return {
+                todo: '',
                 addTitle: '',
                 valueOption: 0,
                 changeTitle: '',
@@ -97,6 +98,11 @@
                 this.changeTitle = '';
             }
 
+        },
+        async mounted () {
+            await this.$store.dispatch('fetchTodo')
+            console.log(this.$store.state.todo.todo)
+            this.todo = this.$store.state.todo.todo
         },
     }
 </script>

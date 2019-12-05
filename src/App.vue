@@ -1,10 +1,11 @@
 <template>
   <div id="app">
-      <div class="all">
+      <authentication v-if="auth" @submitHandler="submitHandler" :isAuth="isAuth"/>
+      <div v-if="isAuth" class="all">
           <div class="divHead">
               <div class="nameLogo">ToDo-list</div>
-              <div class="userName">User_Name</div>
-              <div class="exitTodo">Выйти</div>
+              <div class="userName">{{ userName }}</div>
+              <div @click="logout" class="exitTodo">Выйти</div>
           </div>
           <div class="divMain">
               <todo-list-colomn1 :arrTodo="arrTodo" :delTodo="delTodo" :addTodo="addTodo" :addTodoBut="addTodoBut" :deleteTitle="deleteTitle" :changeTodoEl="changeTodoEl" @changeTodoElem="changeTodoElem" @delChangeTodo="delChangeTodo" @showChangeTodo="showChangeTodo" @selectColorTodo="selectColorTodo" @yesDeleteTodo="yesDeleteTodo" @noDeleteTodo="noDeleteTodo" @showDeleteWindow="showDeleteWindow" @useItem="useItem" @addTodoItem="addTodoItem" @closeAddTodoBut="closeAddTodoBut" @show-addTodo="showAddTodo"/>
@@ -19,10 +20,14 @@
 <script>
   import TodoListColomn1 from './components/TodoListColomn1.vue'
   import TodoListColomn3 from "./components/TodoListColomn3.vue";
+  import Authentication from "./views/Authentication.vue";
   export default {
     name: 'app',
     data() {
       return {
+          isAuth: false,
+          auth: true,
+          userName: '',
           arrTodo: [
               {
                   title: 'Сходить в Офис',
@@ -100,6 +105,7 @@
     components: {
         TodoListColomn1,
         TodoListColomn3,
+        Authentication,
     },
     methods: {
         showDeleteWindow: function (index) {
@@ -212,23 +218,37 @@
             this.changeTodoElChild = false;
         },
         checkDone: function (index) {
-            this.arrTodo[this.useItemIndex].arrTodoChild[index].done = 1;
-            for(let i = 0; i <= this.arrTodo[this.useItemIndex].arrTodoChild.length - 1; i++) {
-                if (this.arrTodo[this.useItemIndex].arrTodoChild[i].done == 1) {
-                    this.arrTodo[this.useItemIndex].doneIndexChild += 1;
-                    /* eslint-disable no-console */
-                    console.log(this.arrTodo[this.useItemIndex].doneIndexChild);
-                    /* eslint-enable no-console */
-                }
+            /* eslint-disable no-console */
+            if (this.arrTodo[this.useItemIndex].arrTodoChild[index].done === 0) {
+                this.arrTodo[this.useItemIndex].arrTodoChild[index].done = 1;
+                this.arrTodo[this.useItemIndex].doneIndexChild++;
+            } else {
+                this.arrTodo[this.useItemIndex].arrTodoChild[index].done = 0;
+                this.arrTodo[this.useItemIndex].doneIndexChild--;
             }
             if (this.arrTodo[this.useItemIndex].doneIndexChild == this.arrTodo[this.useItemIndex].arrTodoChild.length) {
                 this.arrTodo[this.useItemIndex].color = 2;
-                this.arrTodo[this.useItemIndex].doneIndexChild = 0;
             } else {
                 this.arrTodo[this.useItemIndex].color = 1;
             }
         },
-    }
+        submitHandler: function (auth, name) {
+            this.isAuth = auth;
+            this.auth = !auth;
+            this.userName = name;
+        },
+        async logout() {
+            await this.$store.dispatch('logout');
+            this.isAuth = !this.isAuth;
+            this.auth = !this.auth;
+            this.userName = '';
+        },
+    },
+    async mounted () {
+          if (!Object.keys(this.$store.getters.info).length) {
+              await this.$store.dispatch('fetchInfo')
+          }
+    },
   }
 </script>
 
@@ -256,7 +276,7 @@
     .exitTodo {
         font-size: 14px;
         color: white;
-        margin-left: 570px;
+        margin-left: 520px;
     }
     .divMain {
         display: flex;
